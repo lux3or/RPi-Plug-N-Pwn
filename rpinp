@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+
+#Capture traffic on port 22-23
+#tcpdump -nvvX -s0 -i eth0 tcp portrange 22-23
+
+#Cap traffic on specific IP excl subnet
+#tcpdump -I eth0 -tttt dst <x.x.x.x> and not net x.x.x.x/xx
+
+#Cap traffic b/w local
+#tcpdump net 192.x.x
+
+#Cap traffic for N sec
+#dumpcap -I eth0 -a duration:N -w file foobar.pcap
+
+#Mirror/ replay pcap OTW
+#file2cable -i eth0 -f foobar.pcap
+
+#Replay Packets (fuzz|DoS)
+#tcpreplay --topspeed --loop=0 --intf=eth0 <.pcap-source> --mbps=10|100|1000
+
+import os
+import sys
+import time
+import socket as sk
+
+def slowprint(s):
+  for c in s + '\n' :
+    sys.stdout.write(c)
+    sys.stdout.flush()
+    time.sleep(10. / 100)
+
+def loadMessage(choice):
+  slowprint("loading...")
+  time.sleep(1)
+  print("------------------------------\n"+str(List[choice])+"\n--------------------------")
+
+
+#Banner
+print('\033[97m<------\/\/\/\/\/\/\/------->')
+
+slowprint('''\033[92m< RPI OVER THE WIRE PNPWNER >''')
+
+print('\033[97m<-------/\/\/\/\/\/\-------->')
+
+time.sleep(1)
+slowprint('''\033[94mPruning Vines... 
+\033[97mPort scan begins in''')
+num_seconds = 3
+for countdown in reversed(range(num_seconds + 1)):
+    if countdown > 0:
+        print(countdown, end='...', flush=True)
+        time.sleep(1)
+    else:
+        print('Go!')
+os.system('cls' if os.name == 'nt' else 'clear')
+
+print('''\033[97m<------\/\/\/\/\/\/\/------->
+  <------RPI PLUG AND PWN----->
+<-------/\/\/\/\/\/\-------->''')
+
+#Python Port Scanner
+IP=input('Enter IP Range: ')
+for port in range (22,80) :
+  try: 
+    s=sk.socket (sk.AF_INET,sk.SOCK_STREAM)
+    s.settimeout(1000)
+    s.connect (IP, port)
+    print('%d:OPEN' % (port))
+    s.close
+  except: continue
+
+#Options
+List=[
+     [0, "Capture Traffic Over Port(s)"],
+     [1, "Capture Traffic On IP"],
+     [2, "Capture Local Traffic"],
+     [3, "Capture Traffic For N Sec"],
+     [4, "Mirror PCAP Over Wire"],
+     [5, "Fuzz | DoS"]
+     ]
+
+while (1 == 1):                               #main loop
+  [print(item) for item in List] 
+
+  choice = int(input("Select an option:"))
+
+  if choice == 0:
+    loadMessage(choice)
+    bort = input('Select Port Range:')   
+    os.system('tcpdump -nvvX -s0 -i eth0 tcp portrange '+ bort)
+  #Bort. It's a Simpsons reference, also port was already taken.
+
+  elif choice == 1:
+    loadMessage(choice)
+    dest=input('Destination IP: ')
+    excl=input('Exclude Subnet (optional): ')
+    os.system('tcpdump -I eth0 -tttt dst ' + dest + 'and not net' + excl)
+
+  elif choice == 2:
+    loadMessage(choice)
+    net=input('Local Target IP: 192.x.x or 192.x.x.x')
+    os.system('tcpdump net' + net)
+
+  elif choice == 3:
+    loadMessage(choice)
+    time=input('Requested Time Duration in Sec: ')
+    pcap=input('Drag and Drop pcap File to Replay: ')
+    os.system('dumpcap -I eth0 -a duration:'+ time + '-w file ' + pcap)
+    
+  elif choice == 4:
+    loadMessage(choice)
+    mirror=input('Drag and Drop pcap to Play Over Wire: ')
+    os.system('#file2cable -i eth0 -f ' + mirror)
+    
+  elif choice == 5:
+    loadMessage(choice)
+    source=input('Packet File to Send Over Wire: ')
+    os.system('tcpreplay --topspeed --loop=0 --intf=eth0 <' +source+ '> --mbps=10|100|1000')
+    
+  else:
+    input("press any key to exit")
